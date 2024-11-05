@@ -7,6 +7,7 @@
 		"checkJs": false
 	},
 	"references": [
+		{ "path": "../api-fetch" },
 		{ "path": "../components" },
 		{ "path": "../compose" },
 		{ "path": "../data" },
@@ -22,8 +23,9 @@
 		{ "path": "../blob" },
 		{ "path": "../core-data" },
 		{ "path": "../hooks" },
-		{ "path": "../html-entities" }
+		{ "path": "../html-entities" },
+		{ "path": "../media-utils" },
+		{ "path": "../router" }
 	],
-	"include": [ "src" ],
-	"exclude": [ "@wordpress/editor" ]
+	"include": [ "src" ]
 }

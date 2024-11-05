@@ -14,10 +14,8 @@ import {
 	Warning,
 	HeadingLevelDropdown,
 } from '@wordpress/block-editor';
-import { store as coreStore } from '@wordpress/core-data';
-import { ToggleControl, PanelBody, TextControl } from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
+import { ToggleControl, PanelBody } from '@wordpress/components';
+import { __, _x, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -69,7 +67,7 @@ export default function QueryTitleEdit( {
 				if ( archiveNameLabel ) {
 					title = sprintf(
 						/* translators: 1: Archive type title e.g: "Category", 2: Label of the archive e.g: "Shoes" */
-						__( '%1$s: %2$s' ),
+						_x( '%1$s: %2$s', 'archive label' ),
 						archiveTypeLabel,
 						archiveNameLabel
 					);

@@ -34,6 +34,7 @@ import {
 	INSERTER_PATTERN_TYPES,
 } from './utils';
 import { store as blockEditorStore } from '../../../store';
+import { unlock } from '../../../lock-unlock';
 
 const noop = () => {};
 
@@ -45,8 +46,7 @@ export function PatternCategoryPreviews( {
 	showTitlesAsTooltip,
 } ) {
 	const isZoomOutMode = useSelect(
-		( select ) =>
-			select( blockEditorStore ).__unstableGetEditorMode() === 'zoom-out',
+		( select ) => unlock( select( blockEditorStore ) ).isZoomOut(),
 		[]
 	);
 	const [ allPatterns, , onClickPattern ] = usePatternsState(
@@ -117,7 +117,6 @@ export function PatternCategoryPreviews( {
 	const { changePage } = pagingProps;
 
 	// Hide block pattern preview on unmount.
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	useEffect( () => () => onHover( null ), [] );
 
 	const onSetPatternSyncFilter = useCallback(

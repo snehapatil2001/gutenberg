@@ -45,7 +45,7 @@ function PreviewWrapper( { item, onClick, ariaDescribedBy, children } ) {
 			className="page-patterns-preview-field__button"
 			type="button"
 			onClick={ item.type !== PATTERN_TYPES.theme ? onClick : undefined }
-			aria-label={ item.title }
+			aria-label={ defaultGetTitle( item ) }
 			aria-describedby={ ariaDescribedBy }
 			aria-disabled={ item.type === PATTERN_TYPES.theme }
 		>
@@ -133,8 +133,7 @@ function TitleField( { item } ) {
 					title
 				) : (
 					<Button
-						// TODO: Switch to `true` (40px size) if possible
-						__next40pxDefaultSize={ false }
+						__next40pxDefaultSize
 						variant="link"
 						onClick={ onClick }
 						// Required for the grid's roving tab index system.

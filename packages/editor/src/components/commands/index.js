@@ -36,7 +36,6 @@ function useEditorCommandLoader() {
 		isListViewOpen,
 		showBlockBreadcrumbs,
 		isDistractionFree,
-		isTopToolbar,
 		isFocusMode,
 		isPreviewMode,
 		isViewable,
@@ -56,8 +55,7 @@ function useEditorCommandLoader() {
 			showBlockBreadcrumbs: get( 'core', 'showBlockBreadcrumbs' ),
 			isDistractionFree: get( 'core', 'distractionFree' ),
 			isFocusMode: get( 'core', 'focusMode' ),
-			isTopToolbar: get( 'core', 'fixedToolbar' ),
-			isPreviewMode: getSettings().__unstableIsPreviewMode,
+			isPreviewMode: getSettings().isPreviewMode,
 			isViewable: getPostType( getCurrentPostType() )?.viewable ?? false,
 			isCodeEditingEnabled: getEditorSettings().codeEditingEnabled,
 			isRichEditingEnabled: getEditorSettings().richEditingEnabled,
@@ -73,6 +71,8 @@ function useEditorCommandLoader() {
 		setIsListViewOpened,
 		switchEditorMode,
 		toggleDistractionFree,
+		toggleSpotlightMode,
+		toggleTopToolbar,
 	} = useDispatch( editorStore );
 	const { openModal, enableComplementaryArea, disableComplementaryArea } =
 		useDispatch( interfaceStore );
@@ -98,8 +98,8 @@ function useEditorCommandLoader() {
 	commands.push( {
 		name: 'core/toggle-distraction-free',
 		label: isDistractionFree
-			? __( 'Exit Distraction Free' )
-			: __( 'Enter Distraction Free' ),
+			? __( 'Exit Distraction free' )
+			: __( 'Enter Distraction free' ),
 		callback: ( { close } ) => {
 			toggleDistractionFree();
 			close();
@@ -117,25 +117,12 @@ function useEditorCommandLoader() {
 
 	commands.push( {
 		name: 'core/toggle-spotlight-mode',
-		label: __( 'Toggle spotlight' ),
+		label: isFocusMode
+			? __( 'Exit Spotlight mode' )
+			: __( 'Enter Spotlight mode' ),
 		callback: ( { close } ) => {
-			toggle( 'core', 'focusMode' );
+			toggleSpotlightMode();
 			close();
-			createInfoNotice(
-				isFocusMode ? __( 'Spotlight off.' ) : __( 'Spotlight on.' ),
-				{
-					id: 'core/editor/toggle-spotlight-mode/notice',
-					type: 'snackbar',
-					actions: [
-						{
-							label: __( 'Undo' ),
-							onClick: () => {
-								toggle( 'core', 'focusMode' );
-							},
-						},
-					],
-				}
-			);
 		},
 	} );
 
@@ -160,30 +147,10 @@ function useEditorCommandLoader() {
 
 	commands.push( {
 		name: 'core/toggle-top-toolbar',
-		label: __( 'Toggle top toolbar' ),
+		label: __( 'Top toolbar' ),
 		callback: ( { close } ) => {
-			toggle( 'core', 'fixedToolbar' );
-			if ( isDistractionFree ) {
-				toggleDistractionFree();
-			}
+			toggleTopToolbar();
 			close();
-			createInfoNotice(
-				isTopToolbar
-					? __( 'Top toolbar off.' )
-					: __( 'Top toolbar on.' ),
-				{
-					id: 'core/editor/toggle-top-toolbar/notice',
-					type: 'snackbar',
-					actions: [
-						{
-							label: __( 'Undo' ),
-							onClick: () => {
-								toggle( 'core', 'fixedToolbar' );
-							},
-						},
-					],
-				}
-			);
 		},
 	} );
 
@@ -224,7 +191,7 @@ function useEditorCommandLoader() {
 
 	commands.push( {
 		name: 'core/open-settings-sidebar',
-		label: __( 'Toggle settings sidebar' ),
+		label: __( 'Show or hide the Settings panel.' ),
 		icon: isRTL() ? drawerLeft : drawerRight,
 		callback: ( { close } ) => {
 			const activeSidebar = getActiveComplementaryArea( 'core' );
@@ -239,7 +206,7 @@ function useEditorCommandLoader() {
 
 	commands.push( {
 		name: 'core/open-block-inspector',
-		label: __( 'Toggle block inspector' ),
+		label: __( 'Show or hide the Block settings panel' ),
 		icon: blockDefault,
 		callback: ( { close } ) => {
 			const activeSidebar = getActiveComplementaryArea( 'core' );

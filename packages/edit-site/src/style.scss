@@ -1,4 +1,6 @@
 @import "../../dataviews/src/style.scss";
+@import "../../fields/src/styles.scss";
+@import "../../fields/src/fields/featured-image/style.scss";
 
 @import "./components/add-new-template/style.scss";
 @import "./components/block-editor/style.scss";
@@ -30,11 +32,13 @@
 @import "./components/editor-canvas-container/style.scss";
 @import "./components/post-edit/style.scss";
 @import "./components/post-list/style.scss";
+@import "./components/post-fields/style.scss";
 @import "./components/resizable-frame/style.scss";
 @import "./hooks/push-changes-to-global-styles/style.scss";
 @import "./components/global-styles/font-library-modal/style.scss";
 @import "./components/pagination/style.scss";
 @import "./components/global-styles/variations/style.scss";
+@import "./components/sidebar-global-styles-wrapper/style.scss";
 
 /* stylelint-disable -- Disable reason: View Transitions not supported properly by stylelint. */
 ::view-transition-image-pair(root) {

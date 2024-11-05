@@ -16,7 +16,7 @@ import {
 } from '@wordpress/element';
 import { VisuallyHidden, SearchControl, Popover } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useDebouncedInput } from '@wordpress/compose';
+import { useDebouncedInput, useViewportMatch } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -32,6 +32,8 @@ import InserterSearchResults from './search-results';
 import useInsertionPoint from './hooks/use-insertion-point';
 import { store as blockEditorStore } from '../../store';
 import TabbedSidebar from '../tabbed-sidebar';
+import { useZoomOut } from '../../hooks/use-zoom-out';
+import { unlock } from '../../lock-unlock';
 
 const NOOP = () => {};
 function InserterMenu(
@@ -53,8 +55,7 @@ function InserterMenu(
 	ref
 ) {
 	const isZoomOutMode = useSelect(
-		( select ) =>
-			select( blockEditorStore ).__unstableGetEditorMode() === 'zoom-out',
+		( select ) => unlock( select( blockEditorStore ) ).isZoomOut(),
 		[]
 	);
 	const [ filterValue, setFilterValue, delayedFilterValue ] =
@@ -66,6 +67,8 @@ function InserterMenu(
 	const [ patternFilter, setPatternFilter ] = useState( 'all' );
 	const [ selectedMediaCategory, setSelectedMediaCategory ] =
 		useState( null );
+	const isLargeViewport = useViewportMatch( 'large' );
+
 	function getInitialTab() {
 		if ( __experimentalInitialTab ) {
 			return __experimentalInitialTab;
@@ -76,6 +79,10 @@ function InserterMenu(
 		}
 	}
 	const [ selectedTab, setSelectedTab ] = useState( getInitialTab() );
+
+	const shouldUseZoomOut =
+		selectedTab === 'patterns' || selectedTab === 'media';
+	useZoomOut( shouldUseZoomOut && isLargeViewport );
 
 	const [ destinationRootClientId, onInsertBlocks, onToggleInsertionPoint ] =
 		useInsertionPoint( {
@@ -114,9 +121,9 @@ function InserterMenu(
 	);
 
 	const onInsertPattern = useCallback(
-		( blocks, patternName ) => {
+		( blocks, patternName, ...args ) => {
 			onToggleInsertionPoint( false );
-			onInsertBlocks( blocks, { patternName } );
+			onInsertBlocks( blocks, { patternName }, ...args );
 			onSelect();
 		},
 		[ onInsertBlocks, onSelect ]
@@ -163,7 +170,7 @@ function InserterMenu(
 						setFilterValue( value );
 					} }
 					value={ filterValue }
-					label={ __( 'Search for blocks and patterns' ) }
+					label={ __( 'Search' ) }
 					placeholder={ __( 'Search' ) }
 				/>
 				{ !! delayedFilterValue && (
@@ -317,7 +324,7 @@ function InserterMenu(
 					onSelect={ handleSetSelectedTab }
 					onClose={ onClose }
 					selectedTab={ selectedTab }
-					closeButtonLabel={ __( 'Close block inserter' ) }
+					closeButtonLabel={ __( 'Close Block Inserter' ) }
 					tabs={ [
 						{
 							name: 'blocks',

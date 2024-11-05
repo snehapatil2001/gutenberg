@@ -18,6 +18,7 @@ import {
 	useInnerBlocksProps,
 	__experimentalUseGradient,
 	store as blockEditorStore,
+	useBlockEditingMode,
 } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -46,6 +47,7 @@ import {
 	DEFAULT_BACKGROUND_COLOR,
 	DEFAULT_OVERLAY_COLOR,
 } from './color-utils';
+import { DEFAULT_MEDIA_SIZE_SLUG } from '../constants';
 
 function getInnerBlocksTemplate( attributes ) {
 	return [
@@ -99,6 +101,7 @@ function CoverEdit( {
 		templateLock,
 		tagName: TagName = 'div',
 		isUserOverlayColor,
+		sizeSlug,
 	} = attributes;
 
 	const [ featuredImage ] = useEntityProp(
@@ -107,6 +110,7 @@ function CoverEdit( {
 		'featured_media',
 		postId
 	);
+	const { getSettings } = useSelect( blockEditorStore );
 
 	const { __unstableMarkNextChangeAsNotPersistent } =
 		useDispatch( blockEditorStore );
@@ -148,8 +152,7 @@ function CoverEdit( {
 				isUserOverlayColor: isUserOverlayColor || false,
 			} );
 		} )();
-		// Disable reason: Update the block only when the featured image changes.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+		// Update the block only when the featured image changes.
 	}, [ mediaUrl ] );
 
 	// instead of destructuring the attributes
@@ -197,6 +200,22 @@ function CoverEdit( {
 			newOverlayColor,
 			averageBackgroundColor
 		);
+
+		if ( backgroundType === IMAGE_BACKGROUND_TYPE && mediaAttributes.id ) {
+			const { imageDefaultSize } = getSettings();
+
+			// Try to use the previous selected image size if it's available
+			// otherwise try the default image size or fallback to full size.
+			if ( sizeSlug && newMedia?.sizes?.[ sizeSlug ] ) {
+				mediaAttributes.sizeSlug = sizeSlug;
+				mediaAttributes.url = newMedia?.sizes?.[ sizeSlug ]?.url;
+			} else if ( newMedia?.sizes?.[ imageDefaultSize ] ) {
+				mediaAttributes.sizeSlug = imageDefaultSize;
+				mediaAttributes.url = newMedia?.sizes?.[ sizeSlug ]?.url;
+			} else {
+				mediaAttributes.sizeSlug = DEFAULT_MEDIA_SIZE_SLUG;
+			}
+		}
 
 		setAttributes( {
 			...mediaAttributes,
@@ -277,6 +296,9 @@ function CoverEdit( {
 
 	const isImageBackground = IMAGE_BACKGROUND_TYPE === backgroundType;
 	const isVideoBackground = VIDEO_BACKGROUND_TYPE === backgroundType;
+
+	const blockEditingMode = useBlockEditingMode();
+	const hasNonContentControls = blockEditingMode === 'default';
 
 	const [ resizeListener, { height, width } ] = useResizeObserver();
 	const resizableBoxDimensions = useMemo( () => {
@@ -447,7 +469,7 @@ function CoverEdit( {
 			<>
 				{ blockControls }
 				{ inspectorControls }
-				{ isSelected && (
+				{ hasNonContentControls && isSelected && (
 					<ResizableCoverPopover { ...resizableCoverProps } />
 				) }
 				<TagName
@@ -505,27 +527,6 @@ function CoverEdit( {
 				data-url={ url }
 			>
 				{ resizeListener }
-				{ showOverlay && (
-					<span
-						aria-hidden="true"
-						className={ clsx(
-							'wp-block-cover__background',
-							dimRatioToClass( dimRatio ),
-							{
-								[ overlayColor.class ]: overlayColor.class,
-								'has-background-dim': dimRatio !== undefined,
-								// For backwards compatibility. Former versions of the Cover Block applied
-								// `.wp-block-cover__gradient-background` in the presence of
-								// media, a gradient and a dim.
-								'wp-block-cover__gradient-background':
-									url && gradientValue && dimRatio !== 0,
-								'has-background-gradient': gradientValue,
-								[ gradientClass ]: gradientClass,
-							}
-						) }
-						style={ { backgroundImage: gradientValue, ...bgStyle } }
-					/>
-				) }
 
 				{ ! url && useFeaturedImage && (
 					<Placeholder
@@ -567,7 +568,31 @@ function CoverEdit( {
 						style={ mediaStyle }
 					/>
 				) }
+
+				{ showOverlay && (
+					<span
+						aria-hidden="true"
+						className={ clsx(
+							'wp-block-cover__background',
+							dimRatioToClass( dimRatio ),
+							{
+								[ overlayColor.class ]: overlayColor.class,
+								'has-background-dim': dimRatio !== undefined,
+								// For backwards compatibility. Former versions of the Cover Block applied
+								// `.wp-block-cover__gradient-background` in the presence of
+								// media, a gradient and a dim.
+								'wp-block-cover__gradient-background':
+									url && gradientValue && dimRatio !== 0,
+								'has-background-gradient': gradientValue,
+								[ gradientClass ]: gradientClass,
+							}
+						) }
+						style={ { backgroundImage: gradientValue, ...bgStyle } }
+					/>
+				) }
+
 				{ isUploadingMedia && <Spinner /> }
+
 				<CoverPlaceholder
 					disableMediaButtons
 					onSelectMedia={ onSelectMedia }
@@ -576,7 +601,7 @@ function CoverEdit( {
 				/>
 				<div { ...innerBlocksProps } />
 			</TagName>
-			{ isSelected && (
+			{ hasNonContentControls && isSelected && (
 				<ResizableCoverPopover { ...resizableCoverProps } />
 			) }
 		</>
