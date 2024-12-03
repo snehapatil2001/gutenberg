@@ -52,7 +52,6 @@ function useTemplates( postType ) {
 				templates?.map( ( template ) => ( {
 					value: template.id,
 					label: template.title?.rendered || template.slug,
-					// Add any additional template metadata if needed
 				} ) ) || []
 			);
 		},
