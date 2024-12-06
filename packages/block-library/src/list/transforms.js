@@ -47,6 +47,13 @@ const transforms = {
 			blocks: [ 'core/paragraph', 'core/heading' ],
 			transform: ( blockAttributes ) => {
 				let childBlocks = [];
+				const listAttributes = {
+					anchor: blockAttributes.anchor,
+					fontSize: blockAttributes[ 0 ]?.fontSize,
+					textColor: blockAttributes[ 0 ]?.textColor,
+					backgroundColor: blockAttributes[ 0 ]?.backgroundColor,
+				};
+
 				if ( blockAttributes.length > 1 ) {
 					childBlocks = blockAttributes.map( ( { content } ) => {
 						return createBlock( 'core/list-item', { content } );
@@ -61,13 +68,7 @@ const transforms = {
 						} );
 					} );
 				}
-				return createBlock(
-					'core/list',
-					{
-						anchor: blockAttributes.anchor,
-					},
-					childBlocks
-				);
+				return createBlock( 'core/list', listAttributes, childBlocks );
 			},
 		},
 		{
