@@ -83,7 +83,7 @@ export default function NavigationInnerBlocks( {
 			onChange,
 			prioritizedInserterBlocks: PRIORITIZED_INSERTER_BLOCKS,
 			defaultBlock: DEFAULT_BLOCK,
-			directInsert: true,
+			directInsert: false,
 			orientation,
 			templateLock,
 

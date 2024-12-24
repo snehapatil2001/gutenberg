@@ -5,6 +5,7 @@ export const DEFAULT_BLOCK = {
 export const PRIORITIZED_INSERTER_BLOCKS = [
 	'core/navigation-link/page',
 	'core/navigation-link',
+	'core/navigation-submenu',
 ];
 
 // These parameters must be kept aligned with those in
